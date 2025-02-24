@@ -1,12 +1,12 @@
-<script>
+<script lang="ts">
 	import { enhance } from '$app/forms';
-	export let form;
+	let { form } = $props();
 
-	let username = '';
-	let password = '';
+	let username = $state('');
+	let password = $state('');
 
-	$: userError = username.length < 3;
-	$: passwordError = password.length < 8;
+	let userError = $derived(username.length < 3);
+	let passwordError = $derived(password.length < 8);
 </script>
 
 <div class="page-contents">

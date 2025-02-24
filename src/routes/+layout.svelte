@@ -1,5 +1,5 @@
-<script>
-	export let data;
+<script lang="ts">
+	let { data, children } = $props();
 </script>
 
 <div class="navbar">
@@ -18,7 +18,7 @@
 	</div>
 </div>
 
-<slot />
+{@render children?.()}
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&display=swap');

@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	import { enhance } from '$app/forms';
 
-    export let form;
+	let { form } = $props();
 
-	let email = '';
-	let password = '';
+	let email = $state('');
+	let password = $state('');
 </script>
 
 <div class="page-contents">

@@ -1,6 +1,12 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    export let show = false;
+  interface Props {
+    show?: boolean;
+    header?: import('svelte').Snippet;
+    children?: import('svelte').Snippet;
+  }
+
+  let { show = false, header, children }: Props = $props();
     const dispatch = createEventDispatcher();
   
     function close() {
@@ -18,19 +24,19 @@
 </script>
   
 {#if show}
-  <div class="modal-overlay" on:click={close}>
+  <div class="modal-overlay" onclick={close}>
     <div
       class="modal-content"
       role="dialog"
       tabindex="0"
-      on:click={handleContentClick}
-      on:keydown={handleContentKeydown}
+      onclick={handleContentClick}
+      onkeydown={handleContentKeydown}
     >
       <header>
-        <slot name="header"></slot>
+        {@render header?.()}
       </header>
       <main>
-        <slot></slot>
+        {@render children?.()}
       </main>
     </div>
   </div>

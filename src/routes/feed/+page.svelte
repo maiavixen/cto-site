@@ -5,7 +5,7 @@
 	import type { Post } from '@prisma/client';
 	import { fly } from 'svelte/transition';
 
-	export let data;
+	let { data } = $props();
 
 	const birdtypes = [
 		'Wood Pigeon',
@@ -41,19 +41,19 @@
 		'Vertwall'
 	];
 
-	let showSubmitModal = false;
-	let showImageModal = false;
-	let showEditModal = false;
+	let showSubmitModal = $state(false);
+	let showImageModal = $state(false);
+	let showEditModal = $state(false);
 
-	let editingPost: Post;
-	let editingPostDate: {};
+	let editingPost: Post = $state();
+	let editingPostDate: {} = $state();
 
 	let imageFile: File | null = null;
-	let modalImageLink: string;
+	let modalImageLink: string = $state();
 
-	let uploadButton: HTMLButtonElement;
+	let uploadButton: HTMLButtonElement = $state();
 
-	let imageLoading = false;
+	let imageLoading = $state(false);
 
 	function getMonthString(month: number) {
 		const monthNames = [
@@ -215,7 +215,7 @@
 		{#if data.loggedIn}
 			<!-- Upload button -->
 			<div class="activate-upload">
-				<button on:click={toggleUploadForm}>Upload</button>
+				<button onclick={toggleUploadForm}>Upload</button>
 			</div>
 		{/if}
 		<div class="posts">
@@ -238,13 +238,13 @@
 						<div class="comments"><strong>Comments:</strong> {post.comment}</div>
 					</div>
 					{#if post.image}
-						<div class="post-image" on:click={() => openImageModal(post.image.url)}>
+						<div class="post-image" onclick={() => openImageModal(post.image.url)}>
 							<img src={post.image.thumbnail} alt="Observation of a bird" />
 						</div>
 					{/if}
 					{#if data.id === post.author.id}
-						<button class="delete-button" on:click={() => handleDelete(post.id)}>Delete</button>
-						<button class="edit-button" on:click={() => openEditModal(post)}>Edit</button>
+						<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
+						<button class="edit-button" onclick={() => openEditModal(post)}>Edit</button>
 					{/if}
 				</div>
 			{/each}
@@ -254,11 +254,13 @@
 
 {#if showSubmitModal}
 	<Modal show={showSubmitModal} on:close={closeModal}>
-		<span slot="header">
-			<h2>Upload New Observation</h2>
-			<button class="close-button" on:click={closeModal}>×</button>
-		</span>
-		<form on:submit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
+		{#snippet header()}
+				<span >
+				<h2>Upload New Observation</h2>
+				<button class="close-button" onclick={closeModal}>×</button>
+			</span>
+			{/snippet}
+		<form onsubmit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location">
@@ -308,7 +310,7 @@
 					id="imageFile"
 					type="file"
 					accept=".png, .jpg, .jpeg"
-					on:change={handleFileChange}
+					onchange={handleFileChange}
 				/>
 			</div>
 			<button bind:this={uploadButton} type="submit">Submit Observation</button>
@@ -318,17 +320,19 @@
 
 {#if showImageModal}
 	<Modal show={showImageModal} on:close={closeImageModal}>
-		<span slot="header">
-			<h2>Observation Image</h2>
-			<button class="close-button" on:click={closeImageModal}>×</button>
-		</span>
+		{#snippet header()}
+				<span >
+				<h2>Observation Image</h2>
+				<button class="close-button" onclick={closeImageModal}>×</button>
+			</span>
+			{/snippet}
 		{#if imageLoading}
 			<div class="loading-indicator">Loading...</div>
 		{/if}
 		<img
 			src={modalImageLink}
 			alt="Observation of a bird"
-			on:load={handleImageLoad}
+			onload={handleImageLoad}
 			class:loading={imageLoading}
 		/>
 	</Modal>
@@ -336,11 +340,13 @@
 
 {#if showEditModal}
 	<Modal show={showEditModal} on:close={closeEditModal}>
-		<span slot="header">
-			<h2>Edit Observation</h2>
-			<button class="close-button" on:click={closeEditModal}>×</button>
-		</span>
-		<form on:submit={handleEditSubmit} method="post" action="?/edit">
+		{#snippet header()}
+				<span >
+				<h2>Edit Observation</h2>
+				<button class="close-button" onclick={closeEditModal}>×</button>
+			</span>
+			{/snippet}
+		<form onsubmit={handleEditSubmit} method="post" action="?/edit">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location" bind:value={editingPost.location}>
