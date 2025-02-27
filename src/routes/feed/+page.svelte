@@ -1,11 +1,29 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import Modal from '$lib/Modal.svelte';
-	import type { Post } from '@prisma/client';
 	import { fly } from 'svelte/transition';
 
-	let { data } = $props();
+	interface PostResponse {
+		author: {
+			id: string;
+			username: string;
+		};
+		bird: string;
+		comment: string;
+		dateTimeOfObservation: Date;
+		duration: number;
+		id: string;
+		image: {
+			url: string;
+			thumbnail: string;
+		};
+		location: string;
+		activity: string;
+		authorId: string;
+		imageId: string;
+	}
+
+	export let data;
 
 	const birdtypes = [
 		'Wood Pigeon',
@@ -41,19 +59,21 @@
 		'Vertwall'
 	];
 
-	let showSubmitModal = $state(false);
-	let showImageModal = $state(false);
-	let showEditModal = $state(false);
+	let showSubmitModal = false;
+	let showImageModal = false;
+	let showEditModal = false;
 
-	let editingPost: Post = $state();
-	let editingPostDate: {} = $state();
+	let editingPost: PostResponse;
+	let editingPostDate: { date: string; time: string };
 
 	let imageFile: File | null = null;
-	let modalImageLink: string = $state();
+	let modalImageLink: string;
 
-	let uploadButton: HTMLButtonElement = $state();
+	let uploadButton: HTMLButtonElement;
 
-	let imageLoading = $state(false);
+	let imageLoading = false;
+
+	let searchQuery = '';
 
 	function getMonthString(month: number) {
 		const monthNames = [
@@ -164,7 +184,7 @@
 		showEditModal = false;
 	}
 
-	function openEditModal(post: Post) {
+	function openEditModal(post: PostResponse) {
 		editingPost = post;
 		const date = new Date(post.dateTimeOfObservation);
 		editingPostDate = {
@@ -195,31 +215,30 @@
 	function handleImageLoad() {
 		imageLoading = false;
 	}
+
+	function filterPosts(posts: PostResponse[], query: string) {
+		if (!query) return posts;
+		const lowerCaseQuery = query.toLowerCase();
+		return posts.filter(
+			(post) =>
+				post.author.username.toLowerCase().includes(lowerCaseQuery) ||
+				post.location.toLowerCase().includes(lowerCaseQuery) ||
+				post.bird.toLowerCase().includes(lowerCaseQuery) ||
+				post.comment.toLowerCase().includes(lowerCaseQuery)
+		);
+	}
 </script>
 
 <div class="main-flex">
 	<div class="main-container">
-		<!-- Example post -->
-		<!--
-            Requested data:
-            Username
-            Location (from a supplied list of Centrala areas)
-            Time of observation
-            Date of observation
-            Bird (from a CTO supplied list plus Other/Unknown)
-            Primary activity (visit/feeding/nesting/Other)
-            Duration of observation (in minutes)
-            Free text comments
-            Photographic image (optional; max 1.2 Megabytes in size; png or jpg only)
-        -->
 		{#if data.loggedIn}
-			<!-- Upload button -->
-			<div class="activate-upload">
-				<button onclick={toggleUploadForm}>Upload</button>
+			<div class="actions">
+				<input type="text" placeholder="Search..." bind:value={searchQuery} class="search-bar" />
+				<button on:click={toggleUploadForm}>Upload</button>
 			</div>
 		{/if}
 		<div class="posts">
-			{#each data.posts as post (post.id)}
+			{#each filterPosts(data.posts, searchQuery) as post (post.id)}
 				<div class="post-template" transition:fly|global={{ y: 200, duration: 500 }}>
 					<div class="post-info">
 						<div class="username"><strong>Username:</strong> {post.author.username}</div>
@@ -238,13 +257,13 @@
 						<div class="comments"><strong>Comments:</strong> {post.comment}</div>
 					</div>
 					{#if post.image}
-						<div class="post-image" onclick={() => openImageModal(post.image.url)}>
+						<div class="post-image" on:click={() => openImageModal(post.image.url)}>
 							<img src={post.image.thumbnail} alt="Observation of a bird" />
 						</div>
 					{/if}
 					{#if data.id === post.author.id}
-						<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
-						<button class="edit-button" onclick={() => openEditModal(post)}>Edit</button>
+						<button class="delete-button" on:click={() => handleDelete(post.id)}>Delete</button>
+						<button class="edit-button" on:click={() => openEditModal(post)}>Edit</button>
 					{/if}
 				</div>
 			{/each}
@@ -255,12 +274,10 @@
 {#if showSubmitModal}
 	<Modal show={showSubmitModal} on:close={closeModal}>
 		{#snippet header()}
-				<span >
-				<h2>Upload New Observation</h2>
-				<button class="close-button" onclick={closeModal}>×</button>
-			</span>
-			{/snippet}
-		<form onsubmit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
+			<h2>Upload New Observation</h2>
+			<button class="close-button" on:click={closeModal}>×</button>
+		{/snippet}
+		<form on:submit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location">
@@ -310,7 +327,7 @@
 					id="imageFile"
 					type="file"
 					accept=".png, .jpg, .jpeg"
-					onchange={handleFileChange}
+					on:change={handleFileChange}
 				/>
 			</div>
 			<button bind:this={uploadButton} type="submit">Submit Observation</button>
@@ -321,18 +338,16 @@
 {#if showImageModal}
 	<Modal show={showImageModal} on:close={closeImageModal}>
 		{#snippet header()}
-				<span >
-				<h2>Observation Image</h2>
-				<button class="close-button" onclick={closeImageModal}>×</button>
-			</span>
-			{/snippet}
+			<h2>Observation Image</h2>
+			<button class="close-button" on:click={closeImageModal}>×</button>
+		{/snippet}
 		{#if imageLoading}
 			<div class="loading-indicator">Loading...</div>
 		{/if}
 		<img
 			src={modalImageLink}
 			alt="Observation of a bird"
-			onload={handleImageLoad}
+			on:load={handleImageLoad}
 			class:loading={imageLoading}
 		/>
 	</Modal>
@@ -341,12 +356,10 @@
 {#if showEditModal}
 	<Modal show={showEditModal} on:close={closeEditModal}>
 		{#snippet header()}
-				<span >
-				<h2>Edit Observation</h2>
-				<button class="close-button" onclick={closeEditModal}>×</button>
-			</span>
-			{/snippet}
-		<form onsubmit={handleEditSubmit} method="post" action="?/edit">
+			<h2>Edit Observation</h2>
+			<button class="close-button" on:click={closeEditModal}>×</button>
+		{/snippet}
+		<form on:submit={handleEditSubmit} method="post" action="?/edit">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location" bind:value={editingPost.location}>
@@ -456,6 +469,13 @@
 		border: 1px solid #ccc;
 	}
 
+	.modal-image {
+		max-width: 90%;
+		max-height: 90%;
+		overflow: auto;
+		width: auto;
+	}
+
 	.post-template img {
 		cursor: pointer;
 	}
@@ -530,5 +550,22 @@
 
 	img.loading {
 		display: none;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin: 20px 0;
+	}
+
+	.search-bar {
+		padding: 0.5rem;
+		font-size: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		width: 100%;
+		max-width: 300px;
+		margin-right: 10px;
 	}
 </style>

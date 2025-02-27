@@ -2,24 +2,18 @@ import { CDN } from "$lib/cdn";
 import prisma, { createPost } from "$lib/db";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import type { Post } from "@prisma/client";
 
 export const load: PageServerLoad = async ({ locals }) => {
-    interface LoadData {
-        id?: string;
-        loggedIn: boolean;
-        username?: string;
-        userID?: string;
-        posts: Post[];
-    }
-
-    const data: LoadData = { loggedIn: false, posts: [] };
+    let loggedIn = false;
+    let id;
+    let username;
+    let userID;
 
     if (locals.user) {
-        data.id = locals.user.id;
-        data.loggedIn = true;
-        data.username = locals.user.username;
-        data.userID = locals.user.id;
+        id = locals.user.id;
+        loggedIn = true;
+        username = locals.user.username;
+        userID = locals.user.id;
     }
     
     // Fetch posts
@@ -42,9 +36,14 @@ export const load: PageServerLoad = async ({ locals }) => {
             id: 'desc'
         },
     });
-    data.posts = posts;
 
-    return data;
+    return {
+        id,
+        loggedIn,
+        posts,
+        userID,
+        username,
+    };
 }
 
 export const actions = {
