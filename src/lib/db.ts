@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CLOUDFLARE_ACCOUNT_HASH } from '$env/dynamic/private';
+import { env } from '$env/dynamic/private';
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ location: string, dateTimeOfObservation: Date, bird: string, comment: string, ac
         throw new Error('Image is required');
     }
 
-    const cdnAccountHash = CLOUDFLARE_ACCOUNT_HASH;
+    const cdnAccountHash = env.CLOUDFLARE_ACCOUNT_HASH;
 
     const imageDeliveryURL = `https://imagedelivery.net/${cdnAccountHash}/`;
     const imageURL = `${imageDeliveryURL}${imageID}/public`;

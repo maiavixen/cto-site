@@ -1,30 +1,33 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	interface Props {
-		show?: boolean;
-		header?: import('svelte').Snippet;
-		children?: import('svelte').Snippet;
-	}
+	import { onMount, onDestroy } from 'svelte';
 
-	let { show = false, header, children }: Props = $props();
-	const dispatch = createEventDispatcher();
-
-	function close() {
-		dispatch('close');
-	}
+	let { show = false, header, children, close } = $props();
 
 	function handleContentClick(event: Event) {
 		event.stopPropagation();
 	}
 
 	function handleContentKeydown(event: KeyboardEvent) {
-		// Prevent propagation for keyboard interactions as well
 		event.stopPropagation();
 	}
+
+	function handleGlobalKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && show) {
+			close();
+		}
+	}
+
+	onMount(() => {
+		window.addEventListener('keydown', handleGlobalKeydown);
+	});
+
+	onDestroy(() => {
+		window.removeEventListener('keydown', handleGlobalKeydown);
+	});
 </script>
 
 {#if show}
-	<div class="modal-overlay" onclick={close}>
+	<div class="modal-overlay" onclick={() => close()}>
 		<div
 			class="modal-content"
 			role="dialog"

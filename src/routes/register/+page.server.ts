@@ -1,7 +1,7 @@
 import { register } from '$lib/auth';
 import prisma from '$lib/db';
 import { type Actions, fail, redirect } from '@sveltejs/kit';
-import { INVITE } from '$env/dynamic/private'
+import { env } from '$env/dynamic/private'
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
@@ -29,7 +29,7 @@ export const actions: Actions = {
 		}
 
 		// Check if invite code is correct
-		if (invitecode !== INVITE) {
+		if (invitecode !== env.INVITE) {
 			return fail(400, {
 				message: 'Invalid invite code'
 			});

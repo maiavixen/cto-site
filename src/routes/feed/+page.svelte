@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import Modal from '$lib/Modal.svelte';
+	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 
 	interface PostResponse {
@@ -234,12 +235,16 @@
 		{#if data.loggedIn}
 			<div class="actions">
 				<input type="text" placeholder="Search..." bind:value={searchQuery} class="search-bar" />
-				<button on:click={toggleUploadForm}>Upload</button>
+				<button onclick={toggleUploadForm}>Upload</button>
 			</div>
 		{/if}
 		<div class="posts">
 			{#each filterPosts(data.posts, searchQuery) as post (post.id)}
-				<div class="post-template" transition:fly|global={{ y: 200, duration: 500 }}>
+				<div
+					class="post-template"
+					transition:fly|global={{ y: 200, duration: 500 }}
+					animate:flip={{ duration: 250 }}
+				>
 					<div class="post-info">
 						<div class="username"><strong>Username:</strong> {post.author.username}</div>
 						<div class="location"><strong>Location:</strong> {post.location}</div>
@@ -257,13 +262,19 @@
 						<div class="comments"><strong>Comments:</strong> {post.comment}</div>
 					</div>
 					{#if post.image}
-						<div class="post-image" on:click={() => openImageModal(post.image.url)}>
+						<div
+							class="post-image"
+							tabindex="0"
+							role="button"
+							onclick={() => openImageModal(post.image.url)}
+							onkeydown={(e) => e.key === 'Enter' && openImageModal(post.image.url)}
+						>
 							<img src={post.image.thumbnail} alt="Observation of a bird" />
 						</div>
 					{/if}
 					{#if data.id === post.author.id}
-						<button class="delete-button" on:click={() => handleDelete(post.id)}>Delete</button>
-						<button class="edit-button" on:click={() => openEditModal(post)}>Edit</button>
+						<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
+						<button class="edit-button" onclick={() => openEditModal(post)}>Edit</button>
 					{/if}
 				</div>
 			{/each}
@@ -272,12 +283,12 @@
 </div>
 
 {#if showSubmitModal}
-	<Modal show={showSubmitModal} on:close={closeModal}>
+	<Modal show={showSubmitModal} close={closeModal}>
 		{#snippet header()}
 			<h2>Upload New Observation</h2>
-			<button class="close-button" on:click={closeModal}>×</button>
+			<button class="close-button" onclick={closeModal}>×</button>
 		{/snippet}
-		<form on:submit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
+		<form onsubmit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location">
@@ -327,7 +338,7 @@
 					id="imageFile"
 					type="file"
 					accept=".png, .jpg, .jpeg"
-					on:change={handleFileChange}
+					onchange={handleFileChange}
 				/>
 			</div>
 			<button bind:this={uploadButton} type="submit">Submit Observation</button>
@@ -336,10 +347,10 @@
 {/if}
 
 {#if showImageModal}
-	<Modal show={showImageModal} on:close={closeImageModal}>
+	<Modal show={showImageModal} close={closeImageModal}>
 		{#snippet header()}
 			<h2>Observation Image</h2>
-			<button class="close-button" on:click={closeImageModal}>×</button>
+			<button class="close-button" onclick={closeImageModal}>×</button>
 		{/snippet}
 		{#if imageLoading}
 			<div class="loading-indicator">Loading...</div>
@@ -347,19 +358,19 @@
 		<img
 			src={modalImageLink}
 			alt="Observation of a bird"
-			on:load={handleImageLoad}
+			onload={handleImageLoad}
 			class:loading={imageLoading}
 		/>
 	</Modal>
 {/if}
 
 {#if showEditModal}
-	<Modal show={showEditModal} on:close={closeEditModal}>
+	<Modal show={showEditModal} close={closeEditModal}>
 		{#snippet header()}
 			<h2>Edit Observation</h2>
-			<button class="close-button" on:click={closeEditModal}>×</button>
+			<button class="close-button" onclick={closeEditModal}>×</button>
 		{/snippet}
-		<form on:submit={handleEditSubmit} method="post" action="?/edit">
+		<form onsubmit={handleEditSubmit} method="post" action="?/edit">
 			<div class="form-group">
 				<label for="location">Location:</label>
 				<select name="location" id="location" bind:value={editingPost.location}>
@@ -515,7 +526,6 @@
 	.post-image img {
 		max-width: 100%;
 		height: auto;
-		border-radius: 4px;
 	}
 	.delete-button {
 		background-color: #ff4d4d;
@@ -563,7 +573,6 @@
 		padding: 0.5rem;
 		font-size: 1rem;
 		border: 1px solid #ccc;
-		border-radius: 4px;
 		width: 100%;
 		max-width: 300px;
 		margin-right: 10px;
