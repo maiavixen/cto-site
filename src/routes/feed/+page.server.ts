@@ -72,6 +72,13 @@ export const actions = {
             });
         }
 
+        // Prevent attempts at memory exhaustion or other attacks here as well
+        if (location.length > 64 || bird.length > 64 || activity.length > 64 || comments.length > 256) {
+            return error(400, {
+                message: 'Fields too long'
+            });
+        }
+
         // Set a limit of 10MB for the image
         if (imageFile.size > 10 * 1024 * 1024) {
             return error(400, {

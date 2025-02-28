@@ -17,6 +17,13 @@ export const actions: Actions = {
 			});
 		}
 
+		// Prevent attempts at memory exhaustion or other attacks
+		if (username.length > 32 || password.length > 32) {
+			return fail(400, {
+				message: 'Fields too long'
+			});
+		}
+
 		// Check if user already exists
 		const existingUser = await prisma.user.findFirst({
 			where: { username }
