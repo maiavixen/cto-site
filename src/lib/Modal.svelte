@@ -59,7 +59,6 @@
 	}
 	.modal-content {
 		background: white;
-		border-radius: 5px;
 		padding: 1rem;
 		max-width: 90%;
 		max-height: 90%;

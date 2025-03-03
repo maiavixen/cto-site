@@ -1,12 +1,23 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	let { form } = $props();
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+
+	let redirectTo = $state('');
+	onMount(() => {
+		redirectTo = page.url.searchParams.get('redirect') ?? '';
+	});
 
 	let username = $state('');
 	let password = $state('');
+	let invite = $state('');
 
 	let userError = $derived(username.length < 3);
 	let passwordError = $derived(password.length < 8);
+	let inviteError = $derived(invite === '');
+
+	let registerDisabled = $derived(userError || passwordError || inviteError);
 </script>
 
 <div class="page-contents">
@@ -18,7 +29,7 @@
 			{#if form?.message}
 				<p>{form.message}</p>
 			{/if}
-			<label for="username">Username</label>
+			<input name="redirect-to" type="hidden" value={redirectTo} />
 			<input
 				autocomplete="username"
 				name="username"
@@ -45,11 +56,13 @@
 				type="password"
 				name="invite-code"
 				id="invite-code"
+				bind:value={invite}
+				class:errorform={inviteError}
 				required
 				title="If you don't know what this is, check the guide I sent alongside the URL to this assignment!"
 			/>
 
-			<button type="submit">Register</button>
+			<button type="submit" disabled={registerDisabled}>Register</button>
 		</form>
 	</div>
 </div>
@@ -129,6 +142,11 @@
 
 	button:hover {
 		filter: brightness(1.1);
+	}
+
+	button:disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
 	}
 
 	.errorform {

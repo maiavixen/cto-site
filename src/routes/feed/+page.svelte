@@ -1,30 +1,10 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import Modal from '$lib/Modal.svelte';
-	import { flip } from 'svelte/animate';
+	import type { Post } from '@prisma/client';
 	import { fly } from 'svelte/transition';
 
-	interface PostResponse {
-		author: {
-			id: string;
-			username: string;
-		};
-		bird: string;
-		comment: string;
-		dateTimeOfObservation: Date;
-		duration: number;
-		id: string;
-		image: {
-			url: string;
-			thumbnail: string;
-		};
-		location: string;
-		activity: string;
-		authorId: string;
-		imageId: string;
-	}
-
-	export let data;
+	let { data } = $props();
 
 	const birdtypes = [
 		'Wood Pigeon',
@@ -60,21 +40,22 @@
 		'Vertwall'
 	];
 
-	let showSubmitModal = false;
-	let showImageModal = false;
-	let showEditModal = false;
+	let showSubmitModal = $state(false);
+	let showImageModal = $state(false);
+	let showEditModal = $state(false);
 
-	let editingPost: PostResponse;
-	let editingPostDate: { date: string; time: string };
+	let editingPost: Post = $state(data.posts[0]);
+	let editingPostDate: {} = $state({});
 
-	let imageFile: File | null = null;
-	let modalImageLink: string;
+	let imageFile: File | null = $state(null);
+	let modalImageLink: string = $state('');
 
-	let uploadButton: HTMLButtonElement;
+	let uploadButtonContent: string = $state('Upload');
+	let uploadButtonDisabled: boolean = $state(false);
 
-	let imageLoading = false;
+	let imageLoading = $state(false);
 
-	let searchQuery = '';
+	let searchQuery = $state('');
 
 	function getMonthString(month: number) {
 		const monthNames = [
@@ -120,8 +101,8 @@
 
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
-		uploadButton.disabled = true;
-		uploadButton.innerHTML = 'Uploading...';
+		uploadButtonDisabled = true;
+		uploadButtonContent = 'Uploading...';
 
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
@@ -135,8 +116,8 @@
 			invalidateAll();
 			closeModal();
 		} else {
-			uploadButton.disabled = false;
-			uploadButton.innerHTML = 'Submit Observation';
+			uploadButtonDisabled = false;
+			uploadButtonContent = 'Submit Observation';
 			alert('Failed to upload observation');
 		}
 	}
@@ -185,7 +166,7 @@
 		showEditModal = false;
 	}
 
-	function openEditModal(post: PostResponse) {
+	function openEditModal(post: Post) {
 		editingPost = post;
 		const date = new Date(post.dateTimeOfObservation);
 		editingPostDate = {
@@ -217,7 +198,7 @@
 		imageLoading = false;
 	}
 
-	function filterPosts(posts: PostResponse[], query: string) {
+	function filterPosts(posts: Post[], query: string) {
 		if (!query) return posts;
 		const lowerCaseQuery = query.toLowerCase();
 		return posts.filter(
@@ -240,11 +221,7 @@
 		{/if}
 		<div class="posts">
 			{#each filterPosts(data.posts, searchQuery) as post (post.id)}
-				<div
-					class="post-template"
-					transition:fly|global={{ y: 200, duration: 500 }}
-					animate:flip={{ duration: 250 }}
-				>
+				<div class="post-template" transition:fly|global={{ y: 200, duration: 500 }}>
 					<div class="post-info">
 						<div class="username"><strong>Username:</strong> {post.author.username}</div>
 						<div class="location"><strong>Location:</strong> {post.location}</div>
@@ -262,13 +239,7 @@
 						<div class="comments"><strong>Comments:</strong> {post.comment}</div>
 					</div>
 					{#if post.image}
-						<div
-							class="post-image"
-							tabindex="0"
-							role="button"
-							onclick={() => openImageModal(post.image.url)}
-							onkeydown={(e) => e.key === 'Enter' && openImageModal(post.image.url)}
-						>
+						<div class="post-image" onclick={() => openImageModal(post.image.url)}>
 							<img src={post.image.thumbnail} alt="Observation of a bird" />
 						</div>
 					{/if}
@@ -341,7 +312,7 @@
 					onchange={handleFileChange}
 				/>
 			</div>
-			<button bind:this={uploadButton} type="submit">Submit Observation</button>
+			<button disabled={uploadButtonDisabled} type="submit">{uploadButtonContent}</button>
 		</form>
 	</Modal>
 {/if}
@@ -420,7 +391,7 @@
 				<textarea name="comments" id="comments" bind:value={editingPost.comment}></textarea>
 			</div>
 			<input type="hidden" name="postid" value={editingPost.id} />
-			<button bind:this={uploadButton} type="submit">Submit Edit</button>
+			<button type="submit">Submit Edit</button>
 		</form>
 	</Modal>
 {/if}
@@ -526,6 +497,7 @@
 	.post-image img {
 		max-width: 100%;
 		height: auto;
+		border-radius: 4px;
 	}
 	.delete-button {
 		background-color: #ff4d4d;
@@ -573,6 +545,7 @@
 		padding: 0.5rem;
 		font-size: 1rem;
 		border: 1px solid #ccc;
+		border-radius: 4px;
 		width: 100%;
 		max-width: 300px;
 		margin-right: 10px;

@@ -1,5 +1,14 @@
 <script lang="ts">
 	let { data, children } = $props();
+	import { page } from '$app/state';
+
+	function encodeBase64Url(str: string) {
+		const base64 = btoa(unescape(encodeURIComponent(str)));
+		return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+	}
+
+	let currentPath = $derived(page.url.pathname);
+	let b64encodedPath = $derived(encodeBase64Url(currentPath));
 </script>
 
 <div class="navbar">
@@ -12,8 +21,8 @@
 		{#if data.loggedIn}
 			<a href="/logout">Sign out</a>
 		{:else}
-			<a href="/login">Sign in</a>
-			<a href="/register">Sign up</a>
+			<a href="/login?redirect={b64encodedPath}">Sign in</a>
+			<a href="/register?redirect={b64encodedPath}">Sign up</a>
 		{/if}
 	</div>
 </div>

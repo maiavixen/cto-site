@@ -7,6 +7,7 @@ export const actions: Actions = {
         const formdata = await request.formData();
         const username = formdata.get('username') as string;
         const password = formdata.get('password') as string;
+        const redirectTo = formdata.get('redirect-to') as string;
 
         // Ensure both fields are present
         if (!username || !password) {
@@ -26,7 +27,6 @@ export const actions: Actions = {
         const user = await login({ username, password });
 
         // If successful, set the session cookie and redirect to the home page
-        // TODO: Add a redirect to the previous page
         if (user.success && user.session) {
             cookies.set('session', user.session, {
                 path: '/',
@@ -34,6 +34,11 @@ export const actions: Actions = {
 				httpOnly: true,
 				sameSite: 'lax'
 			});
+            
+            if (redirectTo) {
+                return redirect(303, Buffer.from(redirectTo, 'base64url').toString());
+            }
+            
             return redirect(303, '/');
         } else {
             return fail(401, {

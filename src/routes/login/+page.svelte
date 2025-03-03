@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	let { form } = $props();
 
 	let email = $state('');
 	let password = $state('');
+
+	let redirectTo = $state('');
+	onMount(() => {
+		redirectTo = page.url.searchParams.get('redirect') ?? '';
+	});
 </script>
 
 <div class="page-contents">
@@ -13,14 +20,29 @@
 		<img src="CTO-Logo.svg" alt="Centrala Trust for Ornithology" />
 		<h1>Sign in</h1>
 		<form method="post" use:enhance>
-            {#if form?.message}
-                <p>{form.message}</p>
-            {/if}
+			{#if form?.message}
+				<p>{form.message}</p>
+			{/if}
+			<input name="redirect-to" type="hidden" value={redirectTo} />
 			<label for="username">Username</label>
-			<input autocomplete="username" name="username" id="username" type="text" bind:value={email} required />
+			<input
+				autocomplete="username"
+				name="username"
+				id="username"
+				type="text"
+				bind:value={email}
+				required
+			/>
 
 			<label for="password">Password</label>
-			<input autocomplete="current-password" name="password" id="password" type="password" bind:value={password} required />
+			<input
+				autocomplete="current-password"
+				name="password"
+				id="password"
+				type="password"
+				bind:value={password}
+				required
+			/>
 
 			<button type="submit">Login</button>
 		</form>
