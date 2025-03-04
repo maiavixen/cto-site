@@ -63,6 +63,7 @@
 		padding: 1rem;
 		max-width: 90%;
 		max-height: 90%;
+		min-width: 25%;
 		overflow-y: auto;
 		outline: none;
 	}

@@ -251,11 +251,16 @@
 						</button>
 					{/if}
 					{#if data.id === post.author.id}
-						<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
-						<button class="edit-button" onclick={() => openEditModal(post)}>Edit</button>
+						<div class="modifier-buttons">
+							<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
+							<button class="edit-button" onclick={() => openEditModal(post)}>Edit</button>
+						</div>
 					{/if}
 				</div>
 			{/each}
+			{#if data.posts.length === 0}
+				<h1>No observations found</h1>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -478,7 +483,7 @@
 	}
 
 	.post-image {
-		flex: 0 0 150px;
+		flex: 0 0 200px;
 		text-align: center;
 		background: none;
 		padding: 0;
@@ -488,15 +493,25 @@
 	.post-image img {
 		max-width: 100%;
 		height: auto;
-		border-radius: 4px;
 	}
+
+	.modifier-buttons {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		margin-left: 8px;
+		height: 100%;
+	}
+
+	.modifier-buttons button {
+		width: 100%;
+	}
+
 	.delete-button {
 		background-color: #ff4d4d;
 		color: white;
 		border: none;
-		padding: 8px 16px;
 		cursor: pointer;
-		margin-right: 8px;
 	}
 
 	.delete-button:hover {
@@ -507,7 +522,6 @@
 		background-color: #4caf50;
 		color: white;
 		border: none;
-		padding: 8px 16px;
 		cursor: pointer;
 	}
 
