@@ -25,8 +25,6 @@ export const handleMaxSize: Handle = async ({ event, resolve }) => {
 
     const contentLength = +(event.request.headers.get('content-length') ?? 0);
 
-    console.log(event.url.pathname);
-    
     if (event.url.pathname === '/feed') {
         if (contentLength > maxUploadFileSize) {
             return error(413, {
@@ -44,4 +42,15 @@ export const handleMaxSize: Handle = async ({ event, resolve }) => {
     return resolve(event);
 }
 
-export const handle = sequence(handleAuth, handleMaxSize);
+// this one is more for fun than anything, lots of bots will bruteforce URLs to find sensitive routes (like for example, for wordpress they try to find /wp-admin and enumerate plugins, etc)
+export const minipot: Handle = async ({ event, resolve }) => {
+    const response = await resolve(event);
+
+    if (response.status === 404) {
+        console.log(`[minipot] - Catched 404 on "${event.request.url}"!`)
+    }
+
+    return response;
+}
+
+export const handle = sequence(handleAuth, handleMaxSize, minipot);
