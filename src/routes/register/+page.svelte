@@ -20,6 +20,10 @@
 	let registerDisabled = $derived(userError || passwordError || inviteError);
 </script>
 
+<svelte:head>
+	<title>Register - Centrala Trust for Ornithology</title>
+</svelte:head>
+
 <div class="page-contents">
 	<div class="hero-background"></div>
 	<div class="form-container">

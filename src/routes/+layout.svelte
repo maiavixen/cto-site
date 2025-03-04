@@ -11,6 +11,10 @@
 	let b64encodedPath = $derived(encodeBase64Url(currentPath));
 </script>
 
+<svelte:head>
+	<title>Centrala Trust for Ornithology</title>
+</svelte:head>
+
 <div class="navbar">
 	<div class="logo">
 		<img src="CTO-Logo.svg" alt="Centrala Trust for Ornithology" class="logo-navbar" />

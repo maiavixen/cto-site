@@ -213,6 +213,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Feed - Centrala Trust for Ornithology</title>
+</svelte:head>
+
 <div class="main-flex">
 	<div class="main-container">
 		{#if data.loggedIn}

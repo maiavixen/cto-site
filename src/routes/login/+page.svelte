@@ -14,6 +14,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Login - Centrala Trust for Ornithology</title>
+</svelte:head>
+
 <div class="page-contents">
 	<div class="hero-background"></div>
 	<div class="form-container">
