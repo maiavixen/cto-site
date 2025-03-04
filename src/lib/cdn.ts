@@ -45,6 +45,7 @@ export class CDN {
 
             return response
         } catch (err) {
+            console.error(err);
             if (err instanceof Error) {
                 throw err;
             } else {
@@ -59,6 +60,7 @@ export class CDN {
 
             return response;
         } catch (err) {
+            console.error(err);
             if (err instanceof Error) {
                 throw err;
             } else {

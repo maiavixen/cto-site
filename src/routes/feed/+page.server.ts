@@ -105,17 +105,25 @@ export const actions = {
         // Create date object from date and time
         const datetime = new Date(`${date}T${time}`);
 
-        // Save data to database
-        await createPost(
-            location,
-            datetime,
-            bird,
-            comments,
-            activity,
-            image.id,
-            duration,
-            locals.user.id
-        );
+        try {
+            // Save data to database
+            await createPost(
+                location,
+                datetime,
+                bird,
+                comments,
+                activity,
+                image.id,
+                duration,
+                locals.user.id
+            );
+            
+        } catch (err) {
+            console.error(err);
+            return error(500, {
+                message: err instanceof Error ? err.message : 'Unknown error occurred'
+            });
+        }
     },
     edit: async ({ request, locals }) => {
         if (!locals.user) {
@@ -185,9 +193,16 @@ export const actions = {
         const cdn = new CDN();
         await cdn.deleteImage(post.image.id);
 
-        await prisma.post.delete({
-            where: { id: postId }
-        });
+        try {
+            await prisma.post.delete({
+                where: { id: postId }
+            });
+        } catch (err) {
+            console.error(err);
+            return error(500, {
+                message: err instanceof Error ? err.message : 'Unknown error occurred'
+            });
+        }
 
     }
 };
