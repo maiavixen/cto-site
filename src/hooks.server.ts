@@ -47,7 +47,7 @@ export const minipot: Handle = async ({ event, resolve }) => {
     const response = await resolve(event);
 
     if (response.status === 404) {
-        console.log(`[minipot] - Catched 404 on "${event.request.url}"!`)
+        console.log(`[minipot] - Catched 404 on "${event.request.url}"!`) // TODO: log this to a file or DB maybe :3c
     }
 
     return response;
