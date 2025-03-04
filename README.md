@@ -1,5 +1,21 @@
 # CTO site
 
+CTO Site for a LearnDirect assignment.
+The task was to create a website for a fictional city called Centrala, specifically the "Centrala Trust for Ornithology" (CTO).
+
+## Features
+
+- [x] Landing page, with a navigation bar linking to
+  - [x] A user registration page (invite code required!)
+  - [x] A user log-in page
+  - [x] A page which displays all user posts, with edit and delete buttons for the logged in author. The "Create post" is a modal in this page.
+  - [ ] Pagination (was not required)
+- [x] Created a working backend, with database, using Prisma and Postgres.
+- [x] Working authentication, using sessions and cookies.
+- [x] Evaluated the security of the site, and added some basic security measures.
+- [x] File upload, although not to local storage, but to Cloudflare's CDN instead.
+- [x] Deletion of posts, with image deletion from CDN for privacy.
+
 ## Running dev build
 
 Install the dependencies first using npm:
@@ -33,7 +49,6 @@ npm run build
 ```
 
 You can preview the production build with `npm run preview`.
-
 
 ## Running production build
 
