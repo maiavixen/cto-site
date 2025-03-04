@@ -6,6 +6,17 @@
 
 	let { data } = $props();
 
+	interface PostData extends Post {
+		author: {
+			username: string;
+			id: string;
+		};
+		image: {
+			url: string;
+			thumbnail: string;
+		};
+	}
+
 	const birdtypes = [
 		'Wood Pigeon',
 		'House Sparrow',
@@ -44,8 +55,8 @@
 	let showImageModal = $state(false);
 	let showEditModal = $state(false);
 
-	let editingPost: Post = $state(data.posts[0]);
-	let editingPostDate: {} = $state({});
+	let editingPost: PostData = $state(data.posts[0]);
+	let editingPostDate: { date: string; time: string } = $state({ date: '', time: '' });
 
 	let imageFile: File | null = $state(null);
 	let modalImageLink: string = $state('');
@@ -166,7 +177,7 @@
 		showEditModal = false;
 	}
 
-	function openEditModal(post: Post) {
+	function openEditModal(post: PostData) {
 		editingPost = post;
 		const date = new Date(post.dateTimeOfObservation);
 		editingPostDate = {
@@ -194,11 +205,7 @@
 		showImageModal = true;
 	}
 
-	function handleImageLoad() {
-		imageLoading = false;
-	}
-
-	function filterPosts(posts: Post[], query: string) {
+	function filterPosts(posts: PostData[], query: string) {
 		if (!query) return posts;
 		const lowerCaseQuery = query.toLowerCase();
 		return posts.filter(
@@ -239,9 +246,14 @@
 						<div class="comments"><strong>Comments:</strong> {post.comment}</div>
 					</div>
 					{#if post.image}
-						<div class="post-image" onclick={() => openImageModal(post.image.url)}>
+						<button
+							class="post-image"
+							onclick={() => openImageModal(post.image.url)}
+							onkeydown={(e) => e.key === 'Enter' && openImageModal(post.image.url)}
+							aria-label="View observation image"
+						>
 							<img src={post.image.thumbnail} alt="Observation of a bird" />
-						</div>
+						</button>
 					{/if}
 					{#if data.id === post.author.id}
 						<button class="delete-button" onclick={() => handleDelete(post.id)}>Delete</button>
@@ -329,7 +341,7 @@
 		<img
 			src={modalImageLink}
 			alt="Observation of a bird"
-			onload={handleImageLoad}
+			onload={() => (imageLoading = false)}
 			class:loading={imageLoading}
 		/>
 	</Modal>
@@ -413,18 +425,6 @@
 		margin: 2em 0;
 	}
 
-	.activate-upload {
-		display: flex;
-		justify-content: flex-end;
-		margin: 20px 0;
-	}
-
-	.close-button {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		cursor: pointer;
-	}
 	form {
 		display: flex;
 		flex-direction: column;
@@ -449,13 +449,6 @@
 		padding: 0.5rem;
 		font-size: 1rem;
 		border: 1px solid #ccc;
-	}
-
-	.modal-image {
-		max-width: 90%;
-		max-height: 90%;
-		overflow: auto;
-		width: auto;
 	}
 
 	.post-template img {
@@ -492,6 +485,9 @@
 	.post-image {
 		flex: 0 0 150px;
 		text-align: center;
+		background: none;
+		padding: 0;
+		border: none;
 	}
 
 	.post-image img {
