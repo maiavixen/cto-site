@@ -124,6 +124,9 @@ export const actions = {
                 message: err instanceof Error ? err.message : 'Unknown error occurred'
             });
         }
+
+
+        return { status: 200 }
     },
     edit: async ({ request, locals }) => {
         if (!locals.user) {
@@ -168,6 +171,8 @@ export const actions = {
                 duration
             }
         });
+
+        return { status: 200 }
     },
     delete: async ({ request, locals }) => {
         if (!locals.user) {
@@ -204,5 +209,6 @@ export const actions = {
             });
         }
 
+        return { status: 200 }
     }
 };
