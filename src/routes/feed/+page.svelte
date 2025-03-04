@@ -187,11 +187,6 @@
 		showEditModal = true;
 	}
 
-	function handleModalClick(event: Event) {
-		// Prevent clicks inside the modal from closing it
-		event.stopPropagation();
-	}
-
 	function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.files && target.files.length) {
