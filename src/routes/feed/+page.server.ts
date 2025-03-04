@@ -96,6 +96,12 @@ export const actions = {
             });
         }
 
+        if (!image || !image.id) {
+            return error(500, {
+                message: 'Unknown error occurred'
+            });
+        }
+
         // Create date object from date and time
         const datetime = new Date(`${date}T${time}`);
 
@@ -106,7 +112,7 @@ export const actions = {
             bird,
             comments,
             activity,
-            image.result.id,
+            image.id,
             duration,
             locals.user.id
         );
@@ -167,7 +173,7 @@ export const actions = {
 
         const post = await prisma.post.findUnique({
             where: { id: postId },
-            include: { author: true }
+            include: { author: true, image: { select: { id: true } } }
         });
 
         if (!post || post.authorId !== locals.user.id) {
@@ -176,8 +182,12 @@ export const actions = {
             });
         }
 
+        const cdn = new CDN();
+        await cdn.deleteImage(post.image.id);
+
         await prisma.post.delete({
             where: { id: postId }
         });
+
     }
 };

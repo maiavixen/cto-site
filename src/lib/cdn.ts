@@ -1,60 +1,68 @@
-import axios from "axios";
-import FormData from "form-data";
+import Cloudflare from "cloudflare";
+import { env } from "$env/dynamic/private";
 
-export interface CDNImageResponse {
-    result: {
-        id: string;
-        filename: string;
-        metadata: Record<string, string>;
-        uploaded: string;
-        requireSignedURLs: boolean;
-        variants: string[];
-    };
-    success: boolean;
-    errors: string[];
-    messages: string[];
-}
+
 
 export class CDN {
     apiEndpoint: string;
     apiKey: string;
+    apiUserHash: string
+    apiAccountID: string;
+    cloudflare: Cloudflare;
 
     constructor() {
-        this.apiEndpoint = 'https://api.cloudflare.com/client/v4/accounts/1e80b8215a9c3f2386e05f27e84bfae4/images/v1';
-        const apiKey = process.env.CLOUDFLARE_API_KEY;
+        const apiUserHash = env.CLOUDFLARE_ACCOUNT_HASH;
+
+        if (!apiUserHash) {
+            throw new Error('API user hash is required');
+        }
+
+        const apiAccountID = env.CLOUDFLARE_ACCOUNT_ID;
+
+        if (!apiAccountID) {
+            throw new Error('API account ID is required');
+        }
+
+        this.apiUserHash = apiUserHash;
+        this.apiAccountID = apiAccountID;
+
+        this.apiEndpoint = `https://api.cloudflare.com/client/v4/accounts/${apiUserHash}/images/v1`;
+
+        const apiKey = env.CLOUDFLARE_API_KEY;
 
         if (!apiKey) {
             throw new Error('API key is required');
         }
 
         this.apiKey = apiKey;
+        this.cloudflare = new Cloudflare({apiToken: apiKey});
     }
 
-    async uploadImage(file: File): Promise<CDNImageResponse> {
-        const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-        const form = new FormData();
-        form.append("file", fileBuffer, file.name);
-
-        // Prepare headers including form's headers
-        const headers = {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': file.type,
-            ...form.getHeaders()
-        };
+    async uploadImage(file: File): Promise<Cloudflare.Images.V1.Image> {
 
         try {
-            // Upload image to Cloudflare's CDN
-            const response = await axios.post(this.apiEndpoint, form, { headers });
-            if (!response.data.success) {
-                throw new Error(response.data.errors[0].message);
-            }
-            return response.data;
+            const response = await this.cloudflare.images.v1.create({account_id: this.apiAccountID, file: file});
+
+            return response
         } catch (err) {
             if (err instanceof Error) {
                 throw err;
             } else {
                 throw new Error('Unknown error occurred while uploading image to CDN');
+            }
+        }
+    }
+
+    async deleteImage(imageID: string): Promise<Cloudflare.Images.V1DeleteResponse> {
+        try {
+            const response = await this.cloudflare.images.v1.delete(imageID, {account_id: this.apiAccountID});
+
+            return response;
+        } catch (err) {
+            if (err instanceof Error) {
+                throw err;
+            } else {
+                throw new Error('Unknown error occurred while deleting image from CDN');
             }
         }
     }

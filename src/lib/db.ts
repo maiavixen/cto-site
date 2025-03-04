@@ -33,6 +33,7 @@ location: string, dateTimeOfObservation: Date, bird: string, comment: string, ac
             activity,
             image: {
                 create: {
+                    id: imageID,
                     url: imageURL,
                     thumbnail: thumbnailURL,
                 }
