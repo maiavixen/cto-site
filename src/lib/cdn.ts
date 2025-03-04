@@ -49,7 +49,6 @@ export class CDN {
             if (!response.data.success) {
                 throw new Error(response.data.errors[0].message);
             }
-            console.log(response.data);
             return response.data;
         } catch (err) {
             if (err instanceof Error) {
