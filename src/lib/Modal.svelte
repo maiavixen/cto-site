@@ -27,6 +27,7 @@
 </script>
 
 {#if show}
+	<!-- I get ARIA role issues here, not sure how to fix without turning the whole thing into a button. -->
 	<div class="modal-overlay" onclick={() => close()}>
 		<div
 			class="modal-content"
