@@ -64,6 +64,10 @@
 	let uploadButtonContent: string = $state('Upload');
 	let uploadButtonDisabled: boolean = $state(false);
 
+	let uploadError = $state();
+
+	let fileTooLarge = $state(false);
+
 	let imageLoading = $state(false);
 
 	let searchQuery = $state('');
@@ -125,11 +129,13 @@
 
 		if (response.ok) {
 			invalidateAll();
+			uploadButtonDisabled = false;
+			uploadButtonContent = 'Submit Observation';
 			closeModal();
 		} else {
 			uploadButtonDisabled = false;
 			uploadButtonContent = 'Submit Observation';
-			alert('Failed to upload observation');
+			uploadError = response.status;
 		}
 	}
 
@@ -190,6 +196,14 @@
 	function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.files && target.files.length) {
+			if (target.files[0].size > 1024 * 1024 * 10) {
+				// 10MB
+				fileTooLarge = true;
+				uploadButtonDisabled = true;
+				return;
+			}
+			fileTooLarge = false;
+			uploadButtonDisabled = false;
 			imageFile = target.files[0];
 		}
 	}
@@ -275,6 +289,9 @@
 			<h2>Upload New Observation</h2>
 			<button class="close-button" onclick={closeModal}>×</button>
 		{/snippet}
+		{#if uploadError === 413 || fileTooLarge}
+			<p class="inline-error">File is too large</p>
+		{/if}
 		<form onsubmit={handleSubmit} method="post" action="?/post" enctype="multipart/form-data">
 			<div class="form-group">
 				<label for="location">Location:</label>
@@ -453,6 +470,16 @@
 		padding: 0.5rem;
 		font-size: 1rem;
 		border: 1px solid #ccc;
+	}
+
+	.inline-error {
+		color: red;
+		font-size: x-large;
+		background: rgb(255, 219, 219);
+		text-align: center;
+		padding: 0.5rem;
+		margin-bottom: 1rem;
+		border: solid 1px red;
 	}
 
 	.post-template img {
