@@ -70,6 +70,11 @@
 		background-color: var(--main-color);
 	}
 
+	:global(button:disabled) {
+		background-color: #ccc;
+		cursor: not-allowed;
+	}
+
 	.navbar {
 		display: flex;
 		justify-content: center;
