@@ -3,6 +3,8 @@ import prisma, { createPost } from "$lib/db";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
+const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
 export const load: PageServerLoad = async ({ locals }) => {
     let loggedIn = false;
     let id;
@@ -83,6 +85,13 @@ export const actions = {
         if (imageFile.size > 10 * 1024 * 1024) {
             return error(400, {
                 message: 'Image size must be less than 10MB'
+            });
+        }
+
+        // Check if the file is an image
+        if (!allowedMimeTypes.includes(imageFile.type)) {
+            return error(400, {
+                message: 'File must be an image'
             });
         }
 
