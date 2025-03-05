@@ -7,7 +7,16 @@
 		return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 	}
 
-	let currentPath = $derived(page.url.pathname);
+	let currentPathDerived = $derived(page.url.pathname);
+
+	let currentPath = $state('/');
+
+	$effect(() => {
+		if (currentPathDerived !== '/login' && currentPathDerived !== '/register') {
+			currentPath = currentPathDerived;
+		}
+	});
+
 	let b64encodedPath = $derived(encodeBase64Url(currentPath));
 </script>
 
