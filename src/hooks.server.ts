@@ -20,14 +20,14 @@ export const handleAuth: Handle = async ({ event, resolve }) => {
 };
 
 export const handleMaxSize: Handle = async ({ event, resolve }) => {
-    const defaultMaxBytesSize = 512 * 1000 // 512KB
-    const maxUploadFileSize = 10 * 1000 * 1000 // 10MB
+    const defaultMaxBytesSize = 512 * 1024 // 512KB
+    const maxUploadFileSize = 1024 * 1024 * 10 // 10MB
 
     const contentLength = +(event.request.headers.get('content-length') ?? 0);
 
     if (event.url.pathname === '/feed') {
         if (contentLength > maxUploadFileSize) {
-            return error(413, {
+            throw error(413, {
                 message: 'Request entity too large'
             });
         }
@@ -35,7 +35,7 @@ export const handleMaxSize: Handle = async ({ event, resolve }) => {
     }
 
     if (contentLength > defaultMaxBytesSize) {
-        return error(413, {
+        throw error(413, {
             message: 'Request entity too large'
         });
     }
